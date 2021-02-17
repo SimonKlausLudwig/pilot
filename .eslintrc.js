@@ -101,6 +101,7 @@ module.exports = {
       rules: {
         // This project uses TS. Disable prop-types check
         'react/prop-types': 'off',
+        "react/destructuring-assignment": 0,
         // Allow snake_case due to inconsistent APIs
         '@typescript-eslint/camelcase': 0,
         // Makes no sense to allow type inferrence for expression parameters, but require typing the response

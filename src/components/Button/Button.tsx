@@ -1,185 +1,85 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
-import styled from '@emotion/styled';
-import { css } from '@emotion/core';
-import { Theme } from '@theme/styled';
-import { rem } from 'polished';
-import { Link } from 'gatsby-plugin-intl';
 
-import { LoadingSpinner } from '~/components/LoadingIndicators';
+export const looks = ['orange', 'dark', 'default'] as const;
+export const sizes = ['small', 'medium', 'big'] as const;
+type Size = typeof sizes[number];
+export const tagNames = ['a', 'button', 'div'] as const;
+export const width = ['min', 'max'] as const;
 
-import { above, spacer } from '~/utils/styles';
-import { GetRenderComponentProps } from '~/utils/types';
+type Look = typeof looks[number];
 
-type Color = 'primary' | 'secondary';
-type Variant = 'default' | 'outline';
-export type Size = 'large' | 'medium' | 'small';
+export const Sizes: { [P in typeof sizes[number]]: any } = {
+  small: { padding: '0 4px' },
+  medium: { padding: '10px 25px' },
+  big: { padding: '12px 43px' },
+};
 
-type RenderComponent = React.ComponentType | typeof Link | 'a';
+export const Looks: { [P in typeof looks[number]]: any } = {
+  orange: {
+    backgroundImage:
+      'linear-gradient(230deg, rgb(203, 117, 46) 0%, rgb(168, 52, 52) 97%)',
+  },
+  dark: { backgroundColor: '#111426' },
+  default: { backgroundColor: '#0ba3a7' },
+};
 
-type Props<E extends RenderComponent> = {
-  as?: E;
-  name?: string;
+export interface ButtonProps {
+  text?: string;
+  href?: string;
+  look?: Look;
   size?: Size;
-  color?: Color;
-  variant?: Variant;
-  isLoading?: boolean;
-  disabled?: boolean;
-  /* Strips button styles for a button that looks like a regular anchor tag */
-  stripButtonStyles?: boolean;
-} & React.ComponentProps<'button'> &
-  GetRenderComponentProps<E>;
+  tagName?: typeof tagNames[number];
+  width?: typeof width[number];
+  target?: '_blank' | '_self' | '_parent' | '_top' | 'framename';
+  id?: string;
+  onClick?: () => void;
+}
 
-// These colors are not part of the design system color palette (defined in the Theme)
-const interactionColors = {
-  hover: {
-    primary: {
-      default: '#ffD840',
-      outline: '#ffcc00',
-    },
-    secondary: {
-      default: '#40a2a6',
-      outline: '#008489',
-    },
-  },
-  active: {
-    primary: {
-      default: '#e6b800',
-      outline: '#ffcc00',
-    },
-    secondary: {
-      default: '#00696d',
-      outline: '#00696D',
-    },
-  },
+const ButtonStyle = {
+  display: 'inline-flex',
+  fontSize: '14px',
+  lineHeight: '22px',
+  padding: '12px 43px',
+  textDecoration: 'none !important',
+  textTransform: 'uppercase',
+  borderRadius: '2px',
+  border: 'none',
+  alignSelf: 'center',
+  cursor: 'pointer',
+  justifyContent: 'center',
+  fontWeight: 600,
+  textAlign: 'center',
+  whiteSpace: 'nowrap',
+  maxWidth: '100%',
+  overflow: 'hidden',
+  transition: 'background .15s ease',
+  color: '#E5ECF4',
+  boxShadow: 'none',
 };
 
-const createStyles = (
-  theme: Theme,
-  size: Size,
-  color: Color,
-  variant: Variant
-) => {
-  return css`
-    /* Defaults (size - medium, color - primary, variant - default) */
-    position: relative;
-    display: inline-block;
-    font-size: ${rem('18px')};
-    font-weight: 400;
-    text-align: center;
-    padding: ${spacer(2)} ${spacer(4)};
-    border-radius: ${theme.shape.borderRadius.large}px;
-    color: ${theme.color.text.heading};
-    background-color: ${theme.color[color]};
-    transition: 150ms;
-    cursor: pointer;
-    line-height: 1.25;
-
-    &:hover {
-      background-color: ${interactionColors.hover[color][variant]};
-    }
-
-    &:active {
-      background-color: ${interactionColors.active[color][variant]};
-    }
-
-    &:disabled {
-      background-color:  ${theme.color.disabled};
-    }
-
-    ${above(
-      'sm',
-      css`
-        padding: ${spacer(2)} ${spacer(6)};
-      `
-    )}
-
-    /* Size modifiers */
-    ${size === 'small' &&
-      css`
-        padding: ${spacer()} ${spacer(3)};
-        font-size: ${rem('16px')};
-
-        ${above(
-          'sm',
-          css`
-            padding: ${spacer(1.5)} ${spacer(4)};
-          `
-        )}
-      `}
-
-    /* Color modifiers */
-    ${color === 'secondary' &&
-      css`
-        color: #fff;
-        background-color: ${theme.color.secondary};
-      `}
-
-    /* Variant - outline  */
-    ${variant === 'outline' &&
-      css`
-        color: ${color === 'primary'
-          ? theme.color.text.heading
-          : theme.color.secondary};
-        background-color: transparent;
-        border: 1px solid
-          ${color === 'primary'
-            ? theme.color.text.heading
-            : theme.color.secondary};
-
-        &:hover,
-        &:active {
-          color: #fff;
-        }
-      `}
-  `;
+const Widths: { [P in typeof width[number]]: any } = {
+  min: { display: 'flex' },
+  max: { display: 'block' },
 };
 
-const loadingStyles = css`
-  display: block;
-  position: absolute;
-  top: 50%;
-  right: 15px;
-  transform: translateY(-50%);
-`;
-
-// For buttons that should look like links
-const stripStyles = css`
-  background: none;
-  color: inherit;
-  border: none;
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-  outline: inherit;
-`;
-
-const StyledButton = styled.button``;
-
-const Button = <T extends RenderComponent>({
-  as,
-  size = 'medium',
-  color = 'primary',
-  variant = 'default',
-  isLoading = false,
-  stripButtonStyles = false,
-  children,
-  ...props
-}: Props<T>): ReturnType<React.FC<Props<T>>> => {
-  const buttonProps = {
-    css: (theme: Theme) =>
-      !stripButtonStyles
-        ? createStyles(theme, size, color, variant)
-        : stripStyles,
-    ...props,
-  };
-
+export const Button = (props: ButtonProps) => {
+  const TagName = props.tagName || (props.href ? 'a' : 'div');
   return (
-    <StyledButton as={as} {...buttonProps}>
-      {children}
-      {isLoading && <LoadingSpinner css={loadingStyles} />}
-    </StyledButton>
+    <TagName
+      data-test="button"
+      {...{ ...props, style: undefined }}
+      target={props.target}
+      css={[
+        ButtonStyle,
+        Widths[props.width || 'max'],
+        Sizes[props.size || 'medium'],
+        Looks[props.look || 'default'],
+      ]}
+      href={props.href}
+      onClick={props.onClick}
+      id={props.id}
+    >
+      {props.text}
+    </TagName>
   );
 };
-
-export default Button;
